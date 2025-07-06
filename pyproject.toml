@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.14.1"]
+build-backend = "hatchling.build"
+
+[project]
+name = "py_s3_storacha"
+dynamic = ["version"]
+authors = [
+  { name="Emmanuel Akanji", email="omoebun52@gmail.com" },
+  { name="Emmanuel Appah", email="climaxating@gmail.com" },
+  { name="Collins Abegunde", email="itszroth@gmail.com" },
+]
+description = "A tool for migrating objects from AWS S3 to Storacha"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICENSE.md"]
+dependencies = [
+    "httpx",
+    "aioboto3"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "pyright"
+]
+
+[project.urls]
+Homepage = "https://github.com/Mahd-Mehn/MM-python-s3-storacha"
+Issues = "https://github.com/Mahd-Mehn/MM-python-s3-storacha/issues"
+
+[tool.hatch.version]
+path = "src/py_s3_storacha/__init__.py"
+
+[tool.hatch.build]
+packages = ["src/py_s3_storacha"]
+include = [
+    "src/py_s3_storacha/py.typed"
+]
