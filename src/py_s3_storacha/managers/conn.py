@@ -1,4 +1,3 @@
-import re
 from typing import TYPE_CHECKING
 
 import aioboto3
@@ -12,32 +11,34 @@ class AsyncConnectionError(Exception):
     pass
 
 
-class ConnectionManager():
+class ConnectionManager:
     def __init__(self, config: MigratorConfig) -> None:
         self._config: MigratorConfig = config
-        self._s3_session: aioboto3.Session | None  = None
         self._s3_client = None
         self._http_session: aiohttp.ClientSession | None = None
 
     async def initialize_conns(self) -> None:
-        self._s3_session = aioboto3.Session()
-        self._s3_client = await self._s3_session.client(
+        s3_session = aioboto3.Session()
+        self._s3_client = await s3_session.client(
             service_name="s3",
             region_name=self._config.s3.region,
             aws_access_key_id=self._config.s3.access_key_id,
-            aws_secret_access_key=self._config.s3.secret_access_key
+            aws_secret_access_key=self._config.s3.secret_access_key,
         ).__aenter__()  # enter the client's async context
 
         # http session for storacha http-bridge
-        self._http_session = aiohttp.ClientSession(headers={"X-Auth-Secret": f"{self._config.storacha.auth_secret}", "Authorization": f"{self._config.storacha.authorization_key}"})
+        self._http_session = aiohttp.ClientSession(
+            headers={
+                "X-Auth-Secret": f"{self._config.storacha.auth_secret}",
+                "Authorization": f"{self._config.storacha.authorization_key}",
+            }
+        )
 
     async def close_connections(self):
-        # 1. Close HTTP session
         if self._http_session:
             await self._http_session.close()
             self._http_session = None
 
-        # 2. Close S3 client
         if self._s3_client:
             await self._s3_client.__aexit__(None, None, None)
             self._s3_client = None
