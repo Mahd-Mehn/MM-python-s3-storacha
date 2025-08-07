@@ -45,19 +45,16 @@ class Migrator:
     async def initialize(self):
         await self._conn.initialize_conns()
 
-
     async def migrate_file(self, key: str):
         # Download from S3
         response = await self._conn.s3.get_object(
-            Bucket=self._conn._config.s3.bucket_name,
-            Key=key
+            Bucket=self._conn._config.s3.bucket_name, Key=key
         )
-        body = await response['Body'].read()
+        body = await response["Body"].read()
 
         # Upload to Storacha
         async with self._conn.storacha.post(
-            "https://api.web3.storage/upload",
-            data=body
+            "https://api.web3.storage/upload", data=body
         ) as upload_resp:
             upload_resp.raise_for_status()
             return await upload_resp.json()
