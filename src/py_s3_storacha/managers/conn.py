@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 import aioboto3
 import aiohttp
 
+from py_s3_storacha.storacha import StorachaClient
+
 if TYPE_CHECKING:
     from py_s3_storacha import MigratorConfig
 
@@ -51,7 +53,11 @@ class ConnectionManager:
         return self._s3_client
 
     @property
-    def storacha(self):
+    def storacha(self) -> StorachaClient:
         if not self._http_session:
             raise AsyncConnectionError("Storacha HTTP session not initialized")
-        return self._http_session
+        return StorachaClient(
+            session=self._http_session,
+            auth_secret=self._config.storacha.auth_secret,
+            auth_key=self._config.storacha.authorization_key
+        )
