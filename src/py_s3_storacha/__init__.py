@@ -25,6 +25,30 @@ from .js_wrapper import (
     find_js_script,
 )
 
+# Data models
+from .models import (
+    MigrationRequest,
+    MigrationResult,
+    MigrationProgress,
+    MigrationStatus,
+    S3Object,
+    ProgressCallback,
+)
+
+# API layer
+from .api import (
+    S3ToStorachaMigrator,
+    migrate_s3_to_storacha,
+)
+
+# Progress reporting
+from .progress import (
+    ProgressReporter,
+    ProgressTracker,
+    create_console_progress_callback,
+    create_logging_progress_callback,
+)
+
 __all__ = [
     # Configuration
     "S3Config",
@@ -40,4 +64,19 @@ __all__ = [
     "JSWrapperManager",
     "validate_nodejs_environment",
     "find_js_script",
+    # Data models
+    "MigrationRequest",
+    "MigrationResult",
+    "MigrationProgress",
+    "MigrationStatus",
+    "S3Object",
+    "ProgressCallback",
+    # API layer
+    "S3ToStorachaMigrator",
+    "migrate_s3_to_storacha",
+    # Progress reporting
+    "ProgressReporter",
+    "ProgressTracker",
+    "create_console_progress_callback",
+    "create_logging_progress_callback",
 ]
