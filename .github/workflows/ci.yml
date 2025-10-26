@@ -30,8 +30,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: "src/py_s3_storacha/js/package-lock.json"
+      
+      - name: 📦  Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: src/py_s3_storacha/js/node_modules
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('src/py_s3_storacha/js/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+            ${{ runner.os }}-node-
 
       - name: 📦  Install Python dependencies
         run: |
