@@ -49,6 +49,9 @@ from .progress import (
     create_logging_progress_callback,
 )
 
+# CLI interface
+from .cli import main as cli_main
+
 __all__ = [
     # Configuration
     "S3Config",
@@ -79,4 +82,6 @@ __all__ = [
     "ProgressTracker",
     "create_console_progress_callback",
     "create_logging_progress_callback",
+    # CLI interface
+    "cli_main",
 ]

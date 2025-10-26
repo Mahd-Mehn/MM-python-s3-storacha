@@ -36,6 +36,9 @@ dev = [
 Homepage = "https://github.com/Mahd-Mehn/MM-python-s3-storacha"
 Issues = "https://github.com/Mahd-Mehn/MM-python-s3-storacha/issues"
 
+[project.scripts]
+py-s3-storacha = "py_s3_storacha.cli:main"
+
 [tool.hatch.version]
 path = "src/py_s3_storacha/__init__.py"
 
