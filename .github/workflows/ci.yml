@@ -1,48 +1,77 @@
 name: CI
 
 on:
-  # Runs on every pull-request event: opened, reopened, or new commits (synchronize)
+  push:
+    branches: ["main", "develop"]
   pull_request:
     branches: ["**"]
 
 jobs:
   test-lint-typecheck:
-    name: Python ${{ matrix.python-version }} • lint, type-check & test
+    name: Python ${{ matrix.python-version }} • Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
 
-    # Test on several Python versions commonly used for libraries
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
+        node-version: ["18", "20"]
 
     steps:
       - name: 🛎️  Checkout code
         uses: actions/checkout@v4
 
-      - name: 🐍  Set up Python
+      - name: 🐍  Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: 📦  Install dependencies
+      - name: 🟢  Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "src/py_s3_storacha/js/package-lock.json"
+
+      - name: 📦  Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e .[dev]
 
+      - name: 📦  Install JavaScript dependencies
+        run: |
+          cd src/py_s3_storacha/js
+          npm ci
+          cd ../../..
+
+      - name: ✅  Verify installation
+        run: |
+          python -c "from py_s3_storacha import verify_installation; import sys; status = verify_installation(); sys.exit(0 if status['ready'] else 1)"
+
       # ---------- Ruff ----------
-      - name: ✨ Ruff – format check
+      - name: ✨  Ruff – format check
         run: ruff format --check .
 
-      - name: 🔍 Ruff – lint
+      - name: 🔍  Ruff – lint
         run: ruff check .
 
       # ---------- Pyright ----------
-      - name: 🔎 Pyright – static type checking
-        # Use the binary installed from pip
+      - name: 🔎  Pyright – static type checking
         run: pyright
 
       # ---------- Pytest ----------
-      - name: 🧪 Pytest – unit tests
+      - name: 🧪  Pytest – unit tests
         run: |
-          pytest -q --color=yes
+          pytest tests/unit/ -v --color=yes --tb=short
+
+      - name: 📊  Test coverage
+        if: matrix.python-version == '3.12' && matrix.node-version == '20'
+        run: |
+          pytest tests/unit/ --cov=py_s3_storacha --cov-report=xml --cov-report=term
+
+      - name: 📈  Upload coverage to Codecov
+        if: matrix.python-version == '3.12' && matrix.node-version == '20'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
