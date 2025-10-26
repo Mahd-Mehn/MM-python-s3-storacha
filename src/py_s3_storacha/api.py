@@ -17,9 +17,11 @@ from .models import (
 )
 from .progress import ProgressReporter
 from .exceptions import MigrationError, ConfigurationError, JSWrapperError
+from .error_handler import with_error_handling, get_retry_handler
+from .logging_config import get_logger
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class S3ToStorachaMigrator:
@@ -55,6 +57,7 @@ class S3ToStorachaMigrator:
         self._migration_start_time: Optional[float] = None
         self._cancelled = False
     
+    @with_error_handling("migration", error_types=(MigrationError, JSWrapperError, asyncio.TimeoutError))
     async def migrate(
         self,
         request: MigrationRequest,
@@ -524,6 +527,7 @@ class S3ToStorachaMigrator:
 
 
 # Convenience function for simple migrations
+@with_error_handling("simple_migration", error_types=(MigrationError, ConfigurationError, JSWrapperError))
 async def migrate_s3_to_storacha(
     s3_config: S3Config,
     storacha_config: StorachaConfig,

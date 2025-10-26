@@ -10,9 +10,11 @@ from typing import Dict, Any, Optional, Tuple, List
 import logging
 
 from .exceptions import JSWrapperError, ConfigurationError
+from .error_handler import with_error_handling, handle_subprocess_error, get_retry_handler
+from .logging_config import get_logger
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class JSWrapperManager:
@@ -51,6 +53,7 @@ class JSWrapperManager:
             f"JavaScript environment validated: Node.js {self._nodejs_version} at {self._nodejs_path}"
         )
     
+    @with_error_handling("javascript_migration", error_types=(JSWrapperError, OSError, asyncio.TimeoutError))
     async def execute_migration(
         self,
         s3_config: Dict[str, Any],
@@ -82,16 +85,11 @@ class JSWrapperManager:
         
         logger.debug(f"Executing JavaScript migration with params: {migration_params}")
         
-        try:
-            # Execute JavaScript subprocess
-            result = await self._execute_js_subprocess(input_data)
-            
-            logger.info("JavaScript migration completed successfully")
-            return result
-            
-        except Exception as e:
-            logger.error(f"JavaScript migration failed: {e}")
-            raise
+        # Execute JavaScript subprocess
+        result = await self._execute_js_subprocess(input_data)
+        
+        logger.info("JavaScript migration completed successfully")
+        return result
     
     async def _execute_js_subprocess(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute JavaScript subprocess with JSON communication.
@@ -137,9 +135,8 @@ class JSWrapperManager:
             
             # Check return code
             if process.returncode != 0:
-                raise JSWrapperError.from_process_result(
-                    return_code=process.returncode,
-                    stdout=stdout,
+                raise handle_subprocess_error(
+                    returncode=process.returncode,
                     stderr=stderr,
                     command=' '.join(cmd)
                 )
