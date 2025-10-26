@@ -13,14 +13,13 @@ from .api import S3ToStorachaMigrator
 from .models import MigrationRequest, MigrationResult, MigrationProgress
 from .progress import create_console_progress_callback
 from .exceptions import S3StorachaError, ConfigurationError, MigrationError
+from .error_handler import with_error_handling, get_error_handler
+from .logging_config import setup_logging, get_logger
 
 
 # Configure logging for CLI
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+setup_logging()
+logger = get_logger(__name__)
 
 
 class CLIArgumentParser:
@@ -561,6 +560,7 @@ class CLIExecutor:
         self.arg_parser = CLIArgumentParser()
         self.config_loader = CLIConfigurationLoader()
     
+    @with_error_handling("cli_execution", error_types=(Exception,), exclude_types=(KeyboardInterrupt,))
     async def execute(self, args: Optional[List[str]] = None) -> int:
         """Execute CLI workflow.
         

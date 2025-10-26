@@ -18,6 +18,17 @@ from .exceptions import (
     MigrationError,
 )
 
+# Error handling
+from .error_handler import (
+    ErrorHandler,
+    RetryHandler,
+    get_error_handler,
+    get_retry_handler,
+    with_error_handling,
+    handle_subprocess_error,
+    handle_validation_error,
+)
+
 # JavaScript wrapper management
 from .js_wrapper import (
     JSWrapperManager,
@@ -63,6 +74,14 @@ __all__ = [
     "JSWrapperError",
     "ConfigurationError",
     "MigrationError",
+    # Error handling
+    "ErrorHandler",
+    "RetryHandler",
+    "get_error_handler",
+    "get_retry_handler",
+    "with_error_handling",
+    "handle_subprocess_error",
+    "handle_validation_error",
     # JavaScript wrapper
     "JSWrapperManager",
     "validate_nodejs_environment",
