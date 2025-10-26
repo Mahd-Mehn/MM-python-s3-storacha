@@ -38,6 +38,8 @@ Issues = "https://github.com/Mahd-Mehn/MM-python-s3-storacha/issues"
 
 [project.scripts]
 py-s3-storacha = "py_s3_storacha.cli:main"
+py-s3-storacha-setup = "py_s3_storacha.setup_helpers:main"
+py-s3-storacha-auth = "py_s3_storacha.auth_helper:main"
 
 [tool.hatch.version]
 path = "src/py_s3_storacha/__init__.py"
@@ -45,5 +47,6 @@ path = "src/py_s3_storacha/__init__.py"
 [tool.hatch.build]
 packages = ["src/py_s3_storacha"]
 include = [
-    "src/py_s3_storacha/py.typed"
+    "src/py_s3_storacha/py.typed",
+    "src/py_s3_storacha/js/**/*"
 ]

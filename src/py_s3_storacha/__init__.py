@@ -2,6 +2,17 @@
 
 __version__ = "0.0.1"
 
+# Setup and authentication helpers
+from .setup_helpers import (
+    install_js_dependencies,
+    verify_installation,
+    print_installation_status,
+    check_nodejs_installed,
+    check_js_dependencies_installed,
+)
+
+from .auth_helper import StorachaAuthHelper
+
 # Configuration classes
 from .config import (
     S3Config,
@@ -103,4 +114,11 @@ __all__ = [
     "create_logging_progress_callback",
     # CLI interface
     "cli_main",
+    # Setup and authentication helpers
+    "install_js_dependencies",
+    "verify_installation",
+    "print_installation_status",
+    "check_nodejs_installed",
+    "check_js_dependencies_installed",
+    "StorachaAuthHelper",
 ]

@@ -1,0 +1,14 @@
+{
+  "name": "s3-to-storacha-js",
+  "version": "0.0.1",
+  "description": "JavaScript implementation for S3 to Storacha migration",
+  "type": "module",
+  "main": "s3-to-storacha.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@storacha/client": "^1.0.0",
+    "@aws-sdk/client-s3": "^3.0.0"
+  }
+}
