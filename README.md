@@ -2,303 +2,421 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PyPI version](https://badge.fury.io/py/py-s3-storacha.svg)](https://badge.fury.io/py/py-s3-storacha)
+[![Node.js 18+](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
 
-A Python library and CLI tool for migrating objects from AWS S3 to Storacha storage. This library wraps an existing JavaScript implementation, providing both programmatic API access and command-line interface for seamless data migration.
+A Python library for migrating files from AWS S3 to Storacha (IPFS). Upload your S3 data to the decentralized web with a simple Python API or CLI tool.
+
+## ✨ What is This?
+
+This library makes it easy to migrate your files from Amazon S3 to Storacha, a decentralized storage network built on IPFS. Your files become permanently accessible via IPFS gateways and content-addressed by their CID (Content Identifier).
 
 ## 🚀 Features
 
-- **🐍 Python API**: Integrate S3 to Storacha migration into your Python applications
-- **⚡ CLI Tool**: Command-line interface for standalone usage and automation
-- **🔄 Automatic Retry**: Built-in retry logic with exponential backoff for transient failures
-- **📊 Progress Tracking**: Real-time progress reporting during migration operations
-- **🛡️ Error Handling**: Comprehensive error handling with meaningful error messages
-- **🔧 Configurable**: Flexible configuration via arguments, environment variables, or config files
-- **📝 Type Hints**: Full type hint support for better development experience
-- **🌐 Cross-Platform**: Works on Windows, macOS, and Linux
+- **Simple Python API** - Integrate S3 to Storacha migration in a few lines of code
+- **Async Support** - Built on asyncio for efficient concurrent operations
+- **Progress Tracking** - Real-time progress callbacks during migration
+- **Error Handling** - Comprehensive error handling with automatic retries
+- **Flexible Configuration** - Environment variables, config files, or direct parameters
+- **Type Safe** - Full type hints for better IDE support
+- **IPFS Integration** - Files become permanently accessible via IPFS gateways
 
 ## 📋 Requirements
 
-- **Python 3.10+**
-- **Node.js 14+** (for JavaScript wrapper execution)
-- **AWS S3 credentials** (access key, secret key, region)
-- **Storacha API credentials** (API key, space name)
+- Python 3.10 or higher
+- Node.js 18 or higher (required by Storacha client)
+- AWS S3 credentials
+- Storacha account (sign up at [storacha.network](https://storacha.network))
 
 ## 🔧 Installation
 
-### From PyPI (Recommended)
+### Quick Install (Recommended)
 
 ```bash
-pip install py-s3-storacha
+# 1. Install the package
+pip install git+https://github.com/Mahd-Mehn/MM-python-s3-storacha.git
+
+# 2. Install JavaScript dependencies (automatic helper)
+python -m py_s3_storacha.setup_helpers
+
+# 3. Set up Storacha authentication (interactive)
+python -m py_s3_storacha.auth_helper --setup
 ```
 
-### From Source
+### Manual Install
 
 ```bash
-git clone https://github.com/Mahd-Mehn/MM-python-s3-storacha.git
-cd MM-python-s3-storacha
-pip install -e .
-```
-
-### Development Installation
-
-```bash
+# 1. Clone and install
 git clone https://github.com/Mahd-Mehn/MM-python-s3-storacha.git
 cd MM-python-s3-storacha
 pip install -e ".[dev]"
+
+# 2. Install JavaScript dependencies
+py-s3-storacha-setup
+
+# 3. Set up authentication
+py-s3-storacha-auth --setup
 ```
+
+### Verify Installation
+
+```bash
+# Check installation status
+py-s3-storacha-setup --check
+
+# Check authentication status
+py-s3-storacha-auth --status
+```
+
+### What Gets Installed
+
+The installation process:
+1. ✅ Installs Python package
+2. ✅ Checks for Node.js 18+ (required)
+3. ✅ Installs `@storacha/client` and `@aws-sdk/client-s3` via npm
+4. ✅ Sets up Storacha authentication (email-based)
+5. ✅ Creates a Storacha space for your uploads
 
 ## 🚀 Quick Start
 
-### CLI Usage
+### Step 1: Authenticate with Storacha
+
+First time only - authenticate with your email:
 
 ```bash
-# Basic migration
-py-s3-storacha \
-  --s3-bucket my-bucket \
-  --s3-region us-east-1 \
-  --storacha-space my-space \
-  --storacha-key YOUR_API_KEY \
-  --source-path folder/ \
-  --dest-path backup/
+# Install Storacha CLI
+npm install -g @storacha/cli
 
-# Migration with patterns
-py-s3-storacha \
-  --s3-bucket my-bucket \
-  --s3-region us-east-1 \
-  --storacha-space my-space \
-  --storacha-key YOUR_API_KEY \
-  --source-path folder/ \
-  --dest-path backup/ \
-  --include-pattern "*.jpg" \
-  --exclude-pattern "temp/*"
+# Login (check your email for verification)
+storacha login your-email@example.com
 
-# Dry run with verbose output
-py-s3-storacha \
-  --s3-bucket my-bucket \
-  --s3-region us-east-1 \
-  --storacha-space my-space \
-  --storacha-key YOUR_API_KEY \
-  --source-path folder/ \
-  --dest-path backup/ \
-  --dry-run --verbose
+# Create a space
+storacha space create my-migration-space
 ```
 
-### Python API Usage
+### Step 2: Set Up Configuration
 
-```python
-import asyncio
-from py_s3_storacha import (
-    S3Config, 
-    StorachaConfig, 
-    MigrationConfig,
-    migrate_s3_to_storacha
-)
-
-async def main():
-    # Configure S3
-    s3_config = S3Config(
-        access_key_id="your-access-key",
-        secret_access_key="your-secret-key",
-        region="us-east-1",
-        bucket_name="my-bucket"
-    )
-    
-    # Configure Storacha
-    storacha_config = StorachaConfig(
-        api_key="your-storacha-api-key",
-        endpoint_url="https://api.storacha.network",
-        space_name="my-space"
-    )
-    
-    # Configure migration options
-    migration_config = MigrationConfig(
-        batch_size=50,
-        timeout_seconds=600,
-        retry_attempts=3,
-        verbose=True
-    )
-    
-    # Execute migration
-    result = await migrate_s3_to_storacha(
-        s3_config=s3_config,
-        storacha_config=storacha_config,
-        source_path="folder/",
-        destination_path="backup/",
-        migration_config=migration_config
-    )
-    
-    print(f"Migration completed: {result.objects_migrated} objects migrated")
-    print(f"Total size: {result.total_size_bytes} bytes")
-    print(f"Duration: {result.duration_seconds:.2f} seconds")
-
-# Run the migration
-asyncio.run(main())
-```
-
-### Advanced Usage with Progress Tracking
-
-```python
-import asyncio
-from py_s3_storacha import (
-    S3ToStorachaMigrator,
-    MigrationRequest,
-    MigrationProgress
-)
-
-def progress_callback(progress: MigrationProgress):
-    """Handle progress updates"""
-    print(f"Progress: {progress.progress_percentage:.1f}% "
-          f"({progress.objects_completed}/{progress.total_objects} objects)")
-
-async def advanced_migration():
-    # Create migrator instance
-    migrator = S3ToStorachaMigrator(
-        s3_config=s3_config,
-        storacha_config=storacha_config,
-        migration_config=migration_config
-    )
-    
-    # Create migration request
-    request = MigrationRequest(
-        source_path="data/",
-        destination_path="backup/data/",
-        include_pattern="*.json",
-        overwrite_existing=False,
-        verify_checksums=True
-    )
-    
-    # Execute with progress tracking
-    result = await migrator.migrate(
-        request=request,
-        progress_callback=progress_callback
-    )
-    
-    return result
-
-asyncio.run(advanced_migration())
-```
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-Set these environment variables to avoid passing credentials via command line:
+Create a `.env` file:
 
 ```bash
 # S3 Configuration
-export AWS_ACCESS_KEY_ID="your-access-key"
-export AWS_SECRET_ACCESS_KEY="your-secret-key"
-export AWS_DEFAULT_REGION="us-east-1"
-export S3_ENDPOINT_URL="https://custom-s3-endpoint.com"  # Optional
+S3_ACCESS_KEY_ID=your_aws_access_key
+S3_SECRET_ACCESS_KEY=your_aws_secret_key
+S3_REGION=us-east-1
+S3_BUCKET_NAME=your-bucket-name
 
 # Storacha Configuration
-export STORACHA_API_KEY="your-storacha-api-key"
-export STORACHA_ENDPOINT_URL="https://api.storacha.network"  # Optional
+STORACHA_API_KEY=your-email@example.com
+STORACHA_ENDPOINT_URL=https://api.storacha.network
+STORACHA_SPACE_NAME=my-migration-space
+
+# Migration Settings (optional)
+MIGRATION_DRY_RUN=false
+MIGRATION_VERBOSE=true
 ```
 
-### Configuration File
+### Step 3: Run Migration
 
-Create a configuration file (JSON, YAML, or TOML):
+```python
+import asyncio
+from py_s3_storacha import (
+    S3Config,
+    StorachaConfig,
+    MigrationRequest,
+    S3ToStorachaMigrator,
+)
 
-```json
-{
-  "s3": {
-    "access_key_id": "your-access-key",
-    "secret_access_key": "your-secret-key",
+async def migrate():
+    # Load configuration from environment
+    s3_config = S3Config.from_env()
+    storacha_config = StorachaConfig.from_env()
+
+    # Create migrator
+    migrator = S3ToStorachaMigrator(s3_config, storacha_config)
+
+    # Create migration request
+    request = MigrationRequest(
+        source_path="my-folder/",
+        destination_path="backup/"
+    )
+
+    # Execute migration
+    result = await migrator.migrate(request)
+
+    # Access your files via IPFS
+    print(f"✓ Migrated {result.objects_migrated} files")
+    print(f"✓ Access via: https://{result.root_cid}.ipfs.storacha.link/")
+
+    return result
+
+# Run it
+asyncio.run(migrate())
+```
+
+That's it! Your files are now on IPFS.
+
+## 📖 API Reference
+
+### Configuration Classes
+
+#### S3Config
+
+```python
+from py_s3_storacha import S3Config
+
+# Create from parameters
+config = S3Config(
+    access_key_id="your_key",
+    secret_access_key="your_secret",
+    region="us-east-1",
+    bucket_name="my-bucket",
+    endpoint_url="https://s3.amazonaws.com"  # Optional
+)
+
+# Or load from environment variables
+config = S3Config.from_env(prefix="S3_")
+
+# Or from dictionary
+config = S3Config.from_dict({
+    "access_key_id": "your_key",
+    "secret_access_key": "your_secret",
     "region": "us-east-1",
     "bucket_name": "my-bucket"
-  },
-  "storacha": {
-    "api_key": "your-storacha-api-key",
-    "endpoint_url": "https://api.storacha.network",
-    "space_name": "my-space"
-  },
-  "migration": {
-    "batch_size": 100,
-    "timeout_seconds": 300,
-    "retry_attempts": 3,
-    "verbose": true
-  }
-}
+})
 ```
 
-Use with CLI:
+#### StorachaConfig
+
+```python
+from py_s3_storacha import StorachaConfig
+
+# Create from parameters
+config = StorachaConfig(
+    api_key="your-email@example.com",  # Your email for authentication
+    endpoint_url="https://api.storacha.network",
+    space_name="my-space"
+)
+
+# Or load from environment
+config = StorachaConfig.from_env(prefix="STORACHA_")
+```
+
+#### MigrationConfig
+
+```python
+from py_s3_storacha import MigrationConfig
+
+config = MigrationConfig(
+    batch_size=100,           # Objects per batch
+    timeout_seconds=300,      # Operation timeout
+    retry_attempts=3,         # Retry failed operations
+    verbose=True,             # Detailed logging
+    dry_run=False            # Set True to test without uploading
+)
+```
+
+### Migration Classes
+
+#### S3ToStorachaMigrator
+
+Main class for performing migrations:
+
+```python
+from py_s3_storacha import S3ToStorachaMigrator, MigrationRequest
+
+# Create migrator
+migrator = S3ToStorachaMigrator(
+    s3_config=s3_config,
+    storacha_config=storacha_config,
+    migration_config=migration_config  # Optional
+)
+
+# Create request
+request = MigrationRequest(
+    source_path="folder/",
+    destination_path="backup/",
+    include_pattern="*.jpg",      # Optional: only migrate matching files
+    exclude_pattern="temp/*",     # Optional: skip matching files
+    overwrite_existing=False,     # Optional: skip existing files
+    verify_checksums=True         # Optional: verify file integrity
+)
+
+# Execute migration
+result = await migrator.migrate(request)
+```
+
+#### MigrationResult
+
+Returned after migration completes:
+
+```python
+result.success              # bool: True if successful
+result.objects_migrated     # int: Number of files migrated
+result.total_size_bytes     # int: Total bytes transferred
+result.duration_seconds     # float: Time taken
+result.errors               # list: Any errors encountered
+result.warnings             # list: Warnings (includes root CID)
+result.skipped_objects      # list: Files skipped
+result.failed_objects       # list: Files that failed
+```
+
+### Progress Tracking
+
+```python
+from py_s3_storacha import MigrationProgress
+
+def on_progress(progress: MigrationProgress):
+    print(f"Progress: {progress.progress_percentage:.1f}%")
+    print(f"Files: {progress.objects_completed}/{progress.total_objects}")
+    print(f"Bytes: {progress.bytes_transferred}/{progress.total_bytes}")
+
+result = await migrator.migrate(request, progress_callback=on_progress)
+```
+
+## � Authentication
+
+### Storacha Authentication
+
+Storacha uses email-based authentication with UCAN delegations. The first time you run a migration:
+
+1. **The script sends a verification email** to the address you provide
+2. **Click the verification link** in your email
+3. **The script continues automatically** once verified
+4. **Credentials are stored** for future use
+
+```python
+# First run - requires email verification
+storacha_config = StorachaConfig(
+    api_key="your-email@example.com",  # Your email
+    endpoint_url="https://api.storacha.network",
+    space_name="my-space"
+)
+
+# Subsequent runs - uses stored credentials automatically
+```
+
+### Alternative: Use Storacha CLI
+
+If you prefer, authenticate once with the CLI:
+
 ```bash
-py-s3-storacha --config-file config.json --source-path folder/ --dest-path backup/
+npm install -g @storacha/cli
+storacha login your-email@example.com
+storacha space create my-space
 ```
 
-## 📖 CLI Reference
+Then the library will use those credentials automatically.
 
-### Required Arguments
+### S3 Authentication
 
-- `--s3-bucket`: S3 bucket name
-- `--storacha-space`: Storacha space name  
-- `--source-path`: Source path in S3 (e.g., "folder/" or "file.txt")
-- `--dest-path`: Destination path in Storacha
+Standard AWS credentials:
 
-### S3 Configuration
+```bash
+# Option 1: Environment variables
+export S3_ACCESS_KEY_ID=your_key
+export S3_SECRET_ACCESS_KEY=your_secret
 
-- `--s3-access-key`: S3 access key ID (or use `AWS_ACCESS_KEY_ID`)
-- `--s3-secret-key`: S3 secret access key (or use `AWS_SECRET_ACCESS_KEY`)
-- `--s3-region`: S3 region (or use `AWS_DEFAULT_REGION`, default: us-east-1)
-- `--s3-endpoint-url`: Custom S3 endpoint URL (or use `S3_ENDPOINT_URL`)
-
-### Storacha Configuration
-
-- `--storacha-api-key`: Storacha API key (or use `STORACHA_API_KEY`)
-- `--storacha-endpoint-url`: Storacha endpoint URL (or use `STORACHA_ENDPOINT_URL`)
-
-### Migration Options
-
-- `--include-pattern`: Include only objects matching this pattern (glob syntax)
-- `--exclude-pattern`: Exclude objects matching this pattern (glob syntax)
-- `--overwrite-existing`: Overwrite existing objects in destination
-- `--no-verify-checksums`: Skip checksum verification during migration
-- `--batch-size`: Number of objects to process in each batch (default: 100)
-- `--timeout`: Timeout for migration operation in seconds (default: 300)
-- `--retry-attempts`: Number of retry attempts for failed operations (default: 3)
-- `--dry-run`: Show what would be migrated without actually doing it
-- `--verbose`: Enable verbose output
-- `--quiet`: Suppress progress output (errors still shown)
-- `--config-file`: Load configuration from file (JSON, YAML, or TOML)
+# Option 2: AWS credentials file (~/.aws/credentials)
+# Option 3: IAM role (if running on EC2/ECS)
+```
 
 ## 🛡️ Error Handling
 
-The library provides comprehensive error handling with automatic retries:
-
-### Error Types
-
-- **ConfigurationError**: Invalid or missing configuration
-- **JSWrapperError**: JavaScript execution failures
-- **MigrationError**: Migration operation failures
-- **NetworkError**: Network connectivity issues
-
-### Retry Logic
-
-- **Network operations**: 3 retries with exponential backoff
-- **JavaScript subprocess failures**: 2 retries with process restart
-- **Configuration errors**: No retries (immediate failure)
-
-### Example Error Handling
+### Exception Types
 
 ```python
 from py_s3_storacha import (
-    ConfigurationError,
-    MigrationError,
-    JSWrapperError
+    S3StorachaError,        # Base exception
+    ConfigurationError,     # Invalid configuration
+    MigrationError,         # Migration failures
+    JSWrapperError         # JavaScript execution errors
 )
 
 try:
-    result = await migrate_s3_to_storacha(...)
+    result = await migrator.migrate(request)
 except ConfigurationError as e:
-    print(f"Configuration error: {e}")
+    print(f"Config error: {e}")
+    print(f"Context: {e.context}")
 except MigrationError as e:
     print(f"Migration failed: {e}")
+    print(f"Failed objects: {e.failed_objects}")
+except S3StorachaError as e:
+    print(f"Error: {e}")
+```
+
+### Automatic Retries
+
+The library automatically retries failed operations:
+
+- **Network errors**: 3 retries with exponential backoff
+- **Transient failures**: Automatic retry with backoff
+- **Configuration errors**: No retry (fail fast)
+
+### Accessing Error Details
+
+```python
+try:
+    result = await migrator.migrate(request)
+except MigrationError as e:
+    # Get error context
+    print(f"Operation: {e.operation}")
+    print(f"Source: {e.source_path}")
+    print(f"Destination: {e.destination_path}")
     print(f"Objects processed: {e.objects_processed}")
-except JSWrapperError as e:
-    print(f"JavaScript wrapper error: {e}")
-    print(f"Return code: {e.return_code}")
+
+    # Get original error
+    if e.original_error:
+        print(f"Caused by: {e.original_error}")
+```
+
+## 🛠️ Helper Commands
+
+The library includes helper commands for setup and authentication:
+
+### Setup Helper
+
+```bash
+# Install JavaScript dependencies
+py-s3-storacha-setup
+
+# Force reinstall
+py-s3-storacha-setup --force
+
+# Check installation status
+py-s3-storacha-setup --check
+```
+
+### Authentication Helper
+
+```bash
+# Interactive setup
+py-s3-storacha-auth --setup
+
+# Setup with specific email
+py-s3-storacha-auth --setup --email you@example.com
+
+# Check authentication status
+py-s3-storacha-auth --status
+```
+
+### Programmatic Usage
+
+```python
+from py_s3_storacha import (
+    install_js_dependencies,
+    verify_installation,
+    StorachaAuthHelper
+)
+
+# Install JS dependencies
+install_js_dependencies()
+
+# Check installation
+status = verify_installation()
+print(f"Ready: {status['ready']}")
+
+# Setup authentication
+helper = StorachaAuthHelper()
+helper.setup_authentication(email="you@example.com")
 ```
 
 ## 🧪 Testing
