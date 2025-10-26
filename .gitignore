@@ -217,5 +217,6 @@ downloaded.txt
 
 # JavaScript dependencies
 src/py_s3_storacha/js/node_modules/
-src/py_s3_storacha/js/package-lock.json
+
+# Config files with credentials
 config.json
