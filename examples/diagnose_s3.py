@@ -136,7 +136,8 @@ def main():
         return 1
 
     print("\nCredentials loaded from .env:")
-    print(f"  Access Key: {access_key[:10]}...")
+    if access_key:
+        print(f"  Access Key: {access_key[:10]}...")
     print(f"  Bucket: {bucket}")
     print(f"  Region: {region}")
     if custom_endpoint:

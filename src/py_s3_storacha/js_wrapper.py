@@ -144,7 +144,9 @@ class JSWrapperManager:
             # Check return code
             if process.returncode != 0:
                 raise handle_subprocess_error(
-                    returncode=process.returncode, stderr=stderr, command=" ".join(cmd)
+                    returncode=process.returncode or 1,
+                    stderr=stderr,
+                    command=" ".join(cmd),
                 )
 
             # Parse JSON response

@@ -152,8 +152,8 @@ def migrate_to_storacha(
         print("✅ Status: SUCCESS")
     else:
         print("❌ Status: FAILED")
-        if result.error:
-            print(f"Error: {result.error}")
+        if result.errors:
+            print(f"Errors: {', '.join(result.errors)}")
 
     print(f"📦 Objects migrated: {result.objects_migrated}")
     print(

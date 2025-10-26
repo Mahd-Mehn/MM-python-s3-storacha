@@ -240,9 +240,9 @@ class RetryHandler:
 
             # Return appropriate wrapper based on function type
             if asyncio.iscoroutinefunction(func):
-                return async_wrapper
+                return async_wrapper  # type: ignore[return-value]
             else:
-                return sync_wrapper
+                return sync_wrapper  # type: ignore[return-value]
 
         return decorator
 
@@ -274,13 +274,13 @@ class RetryHandler:
         for attempt in range(self.max_retries + 1):
             try:
                 return func(*args, **kwargs)
-            except exclude_types as e:
+            except exclude_types as e:  # type: ignore[misc]
                 # Don't retry on excluded error types
                 self.logger.debug(
                     f"Not retrying excluded error type: {type(e).__name__}"
                 )
                 raise
-            except error_types as e:
+            except error_types as e:  # type: ignore[misc]
                 last_exception = e
 
                 if attempt < self.max_retries:
@@ -330,14 +330,15 @@ class RetryHandler:
 
         for attempt in range(self.max_retries + 1):
             try:
-                return await func(*args, **kwargs)
-            except exclude_types as e:
+                result = func(*args, **kwargs)
+                return await result  # type: ignore[misc]
+            except exclude_types as e:  # type: ignore[misc]
                 # Don't retry on excluded error types
                 self.logger.debug(
                     f"Not retrying excluded error type: {type(e).__name__}"
                 )
                 raise
-            except error_types as e:
+            except error_types as e:  # type: ignore[misc]
                 last_exception = e
 
                 if attempt < self.max_retries:
