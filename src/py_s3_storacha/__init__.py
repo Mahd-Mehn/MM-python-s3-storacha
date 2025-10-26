@@ -77,7 +77,7 @@ from .cli import main as cli_main
 __all__ = [
     # Configuration
     "S3Config",
-    "StorachaConfig", 
+    "StorachaConfig",
     "MigrationConfig",
     "ConfigurationParser",
     # Exceptions
